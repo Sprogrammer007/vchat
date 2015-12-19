@@ -1,0 +1,13 @@
+extends ./layout
+
+block content
+  main.chat-box
+    .chat-box-body
+      ul.messages
+    .chat-box-footer
+      input.input-message(type='text' placeholder='Type a message....')
+      button.btn-send Send
+      
+block script
+  script(src='//cdn.socket.io/socket.io-1.3.7.js')
+  script(src='/js/chat.min.js')

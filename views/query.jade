@@ -1,0 +1,30 @@
+extends ./layout
+
+block content  
+  .container
+    .row
+      .col-md-12
+        section.results
+          .result-details
+            .row
+              .col-md-6
+                span Query Time: 
+                span.qtime
+              .col-md-6
+                span # Of Results:
+                span.numresults
+          .result-list
+            .no-result Run a search below.
+            table.table.table-striped
+              thead
+                tr
+                  th Name
+                  th Email
+                  th City
+              tbody
+            
+          .search
+            form(id="searchForm")
+              input(type='text' name='full_name' value="John" autofocus)
+              button.btn.btn-search Search
+          

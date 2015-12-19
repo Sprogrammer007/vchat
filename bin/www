@@ -1,0 +1,144 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app')
+  , debug = require('debug')('http')
+  , http = require('http')
+  , path = require('path')
+  , User = require('../models/user')
+  , fs = require('fs')
+  , _ = require('underscore');
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app)
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+var io = require('socket.io').listen(server);
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+
+/**
+ * Socket IO
+ */
+
+          
+
+io.sockets.on('connection', function (socket) {
+  console.warn("new guess connected");
+  socket.emit('message', {user: 'Admin', message: 'Welcome to Vulcun Chat', role: 'guess'});
+  socket.on('send', function (data) {
+    io.sockets.emit('message', {user: 'Guess', message: data.message, role: 'guess'});
+  });
+});
+
+
+User.top('full_name', 10).then(function(users){
+  if (_.isEmpty(users)) {return};
+  
+  fs.readFile(path.basename('/fake_messages.txt'), function(err, f){
+    var ranMsg= f.toString().split('\n');
+    ranMsg = _.compact(ranMsg);
+    if (_.isEmpty(ranMsg)) {return};
+    
+    setInterval(function(){
+      io.sockets.emit('message', prepareMessages(users, ranMsg))
+    }, 5000);
+    
+  });
+
+});
+
+function prepareMessages(users, msgs) {
+  var messages = [];
+
+  for(i=1; i<1000;) {
+    messages.push({
+      user: users[_.random(0, users.length - 1)]['full_name'],
+      message: msgs[_.random(0, msgs.length - 1)],
+      role: 'user'
+
+    });
+    i++
+  }
+
+  return messages;
+}
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
