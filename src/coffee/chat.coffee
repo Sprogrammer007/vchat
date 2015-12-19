@@ -104,7 +104,7 @@
   ];
 
   
-  socket = io.connect()
+  socket = io.connect('https://localhost:3000', {secure: true})
   messages = $('.messages')
   totalMsg = [];
   currentMsg = 0;
