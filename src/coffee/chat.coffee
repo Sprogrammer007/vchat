@@ -104,7 +104,7 @@
   ];
 
   
-  socket = io.connect()
+  socket = io.connect('https://vulcunchat.herokuapp.com/', {secure: true})
   messages = $('.messages')
   totalMsg = [];
   currentMsg = 0;
